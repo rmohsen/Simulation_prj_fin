@@ -45,26 +45,30 @@ class ProcessGenerator:
         return p
 
 
-def srjf_resource_allocating(self, processes_list, working_speed):
+def srjf_resource_allocating(processes_list, working_speed):
     life_time_list = list()
     for p in processes_list:
         life_time_list.append(p.life_time)
     for p in processes_list:
         if p.life_time == min(life_time_list):
             p.life_time -= working_speed
+            break
 
 
-def random_resource_allocating(self, processes_list):
-    pass
+def random_resource_allocating(processes_list, working_speed):
+    processes_list[random.randint(0, len(processes_list) - 1)].life_time -= working_speed
 
 
-def ps_resource_allocating(self):
-    pass
+def ps_resource_allocating(processes_list, working_speed):
+    shared_working_speed = working_speed / len(processes_list)
+    for p in processes_list:
+        p.life_time -= shared_working_speed
 
 
-def fcfs_resource_allocating(self):
-    pass
+def fcfs_resource_allocating(processes_list, working_speed):
+    # processes_list must be in order of entrance
+    processes_list[0].life_time -= working_speed
 
 
-def precise_calculation(self):
+def precise_calculation():
     pass
