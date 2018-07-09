@@ -2,7 +2,7 @@ import random
 
 
 class Processor:
-    def __init__(self, name, queue_capacity, timing_type, working_speed,mu):
+    def __init__(self, name, queue_capacity, timing_type, working_speed, mu):
         self.mu = mu
         self.name = name
         self.queue_capacity = queue_capacity
@@ -17,14 +17,14 @@ class Processor:
         else:
             pass  # todo
 
-    def serve_process(self,process):
-        #todo:complete
+    def serve_process(self, process):
+        # todo:complete
         l = random.expovariate(lambd=self.mu)
         process.set_work_length(l)
 
+
 class Process:
-    def __init__(self, life_time, creation_time):
-        self.life_time = life_time
+    def __init__(self, creation_time):
         self.creation_time = creation_time
 
     work_length = 10000  # todo:check
@@ -34,14 +34,14 @@ class Process:
 
 
 class ProcessGenerator:
-    def __init__(self, lambd, now, process_life_time):
+    now = 0
+
+    def __init__(self, lambd):
         self.lambd = lambd
-        self.now = now
-        self.process_life_time = process_life_time
 
     def generate_next(self):
         self.now += random.expovariate(self.lambd)
-        p = Process(life_time=self.process_life_time, creation_time=self.now)
+        p = Process(creation_time=self.now)
         return p
 
 
