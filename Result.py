@@ -15,11 +15,17 @@ def calculate_first_question_answer(self):
     core_pros = s.Processor(name=3, queue_capacity=k3, timing_type=3, working_speed=1, mu=mu3)
 
     lambda1 = 7
-    s.ProcessGenerator(lambd=lambda1)
+    p_gen1 = s.ProcessGenerator(lambd=lambda1)
 
     lambda2 = 2
-    s.ProcessGenerator(lambd=lambda2)
+    p_gen2 = s.ProcessGenerator(lambd=lambda2)
+
+    for i in range(5000000):
+        p1 = p_gen1.generate_next()
+        p2 = p_gen2.generate_next()
+
     pass
+
 
 import seaborn
 
