@@ -11,6 +11,8 @@ def simulate(k3):
     global output
 
     mu3 = 1
+    # for optional part of project run with this line
+    # core_pros = sim.Processor(name=3, queue_capacity=k3 + 8, timing_type=4, mu=mu3, next_processor=None)
     core_pros = sim.Processor(name=3, queue_capacity=k3 + 8, timing_type=3, mu=mu3, next_processor=None)
 
     mu1 = 5
@@ -33,9 +35,6 @@ def simulate(k3):
     t = 0
     warm_up = True
     while core_pros.processed_count < processed_count_to_end:
-        # print(len(pre_pros_1.queue), pre_pros_1.processed_count)
-        # print(len(pre_pros_2.queue), pre_pros_2.processed_count)
-        # print(len(core_pros.queue), core_pros.processed_count)
         if core_pros.processed_count >= 50000 and warm_up:
             pre_pros_1.reset_data()
             pre_pros_2.reset_data()
@@ -67,14 +66,6 @@ def simulate(k3):
 
     output[k3].append({1: o11, 2: o12, 3: o13, 4: o21, 5: o22, 6: o23})
 
-    # print("1.1: " + str(o11))
-    # print("1.2: " + str(o12))
-    # print("1.3: " + str(o13))
-    # print("2.1: " + str(o21))
-    # print("2.2: " + str(o22))
-    # print("2.3: " + str(o23))
-    # print("*******************************************************************************************")
-
 
 def notify_process_gen(process_gen, processor, t):
     p = process_gen.generate_next(t)
@@ -94,7 +85,7 @@ def show_plot(values, title):
 processed_count_to_end = 500000
 r = 25
 
-k3_list = [i for i in range(9)]  # minus 8
+k3_list = [i for i in range(9)]  # minus 8 considered
 output = [[] for i in range(9)]
 
 for i in range(r):
