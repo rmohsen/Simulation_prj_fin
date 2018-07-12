@@ -40,9 +40,10 @@ class Processor:
         elif self.timing == 4:
             p = fcfs_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
         if p:
-            p.reset_work_length()
+            if self.timing < 3:
+                p.reset_work_length()
+                self.next_processor.serve_next(p)
             self.sum_latency += p.calculate_latency(time)
-            self.next_processor.serve_next(p)
             self.processed_count += 1
         if p_list:
             self.processed_count += len(p_list)
