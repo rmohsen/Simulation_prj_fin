@@ -2,87 +2,106 @@ import random
 
 
 class Processor:
-    def __init__(self, name, queue_capacity, timing_type, working_speed, mu):
+    def __init__(self, name, queue_capacity, timing_type, mu, next_processor):
         self.mu = mu
         self.name = name
         self.queue = []
         self.queue_capacity = queue_capacity
         self.timing = timing_type
         # for timing_type 1 -> SRJF , 2 -> random , 3 -> PS , 4 -> FCFS
-        self.queue_length = 0
         self.number_of_failures = 0
-        self.time = 0
-        self.working_speed = working_speed
+        self.next_processor = next_processor
+        self.processed_count = 0
+
+    def reset_data(self):
+        self.number_of_failures = 0
+        self.processed_count = 0
 
     def serve_next(self, process):
-        if self.queue_length < self.queue_capacity:
-            self.serve_process(process)
+        if len(self.queue) < self.queue_capacity:
+            self.queue.append(process)
         else:
             self.number_of_failures += 1
 
-    def serve_process(self, process):
-        # todo:complete
-        l = random.expovariate(lambd=self.mu)
-        process.set_work_length(l)
-        # process.interval_time
-        if self.timing == 1:
-            srjf_resource_allocating(self.queue, self.working_speed)
-        elif self.timing == 2:
-            pass
-        elif self.timing == 3:
-            pass
-        elif self.timing == 4:
-            pass
+    def get_power(self):
+        return random.expovariate(lambd=self.mu)
 
-        self.queue.append(process)
-        self.time = process.creation_time
+    def process(self):
+        p = None
+        if self.timing == 1:
+            p = srjf_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+        elif self.timing == 2:
+            p = random_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+        elif self.timing == 3:
+            self.processed_count += ps_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+        elif self.timing == 4:
+            self.processed_count += fcfs_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+        if p:
+            self.next_processor.serve_next(p)
+            self.processed_count += 1
 
 
 class Process:
-    def __init__(self, creation_time, interval_time):
-        self.creation_time = creation_time
-        self.interval_time = 0
-        self.work_length = 10000  # todo:check
-
-    def set_work_length(self, work_length):
+    def __init__(self, work_length):
         self.work_length = work_length
 
 
 class ProcessGenerator:
     def __init__(self, lambd):
         self.lambd = lambd
-        self.now = 0
 
     def generate_next(self):
-        interval_time = random.expovariate(self.lambd)
-        self.now += interval_time
-        p = Process(creation_time=self.now, interval_time=interval_time)
-        return p
+        return Process(random.expovariate(self.lambd))
 
 
 def srjf_resource_allocating(processes_list, working_speed):
+    if not processes_list:
+        return
     work_length_list = list()
     for p in processes_list:
         work_length_list.append(p.work_length)
+    min1 = min(work_length_list)
     for p in processes_list:
-        if p.work_length == min(work_length_list):
+        if p.work_length == min1:
             p.work_length -= working_speed
+            if p.work_length <= 0:
+                processes_list.remove(p)
+                return p
             break
 
 
 def random_resource_allocating(processes_list, working_speed):
-    processes_list[random.randint(0, len(processes_list) - 1)].work_length -= working_speed
+    if len(processes_list) == 0:
+        return
+    p = processes_list[random.randint(0, len(processes_list) - 1)]
+    p.work_length -= working_speed
+    if p.work_length <= 0:
+        processes_list.remove(p)
+        return p
 
 
 def ps_resource_allocating(processes_list, working_speed):
+    if len(processes_list) == 0:
+        return 0
     shared_working_speed = working_speed / len(processes_list)
-    for p in processes_list:
-        p.work_length -= shared_working_speed
+    count = 0
+    for i in range(len(processes_list) - 1, -1, -1):
+        processes_list[i].work_length -= shared_working_speed
+        if processes_list[i].work_length <= 0:
+            processes_list.remove(processes_list[i])
+            count += 1
+    return count
 
 
 def fcfs_resource_allocating(processes_list, working_speed):
-    # processes_list must be in order of entrance
-    processes_list[0].work_length -= working_speed
+    if len(processes_list) == 0:
+        return 0
+    p = processes_list[0]
+    p.work_length -= working_speed
+    if p.work_length <= 0:
+        processes_list.remove(p)
+        return 1
+    return 0
 
 
 def precise_calculation():
