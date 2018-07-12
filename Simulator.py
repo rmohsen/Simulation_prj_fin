@@ -12,10 +12,12 @@ class Processor:
         self.number_of_failures = 0
         self.next_processor = next_processor
         self.processed_count = 0
+        self.sum_latency = 0
 
     def reset_data(self):
         self.number_of_failures = 0
         self.processed_count = 0
+        self.sum_latency = 0
 
     def serve_next(self, process):
         if len(self.queue) < self.queue_capacity:
@@ -26,32 +28,47 @@ class Processor:
     def get_power(self):
         return random.expovariate(lambd=self.mu)
 
-    def process(self):
+    def process(self, time):
         p = None
+        p_list = None
         if self.timing == 1:
             p = srjf_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
         elif self.timing == 2:
             p = random_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
         elif self.timing == 3:
-            self.processed_count += ps_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+            p_list = ps_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
         elif self.timing == 4:
-            self.processed_count += fcfs_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
+            p = fcfs_resource_allocating(processes_list=self.queue, working_speed=self.get_power())
         if p:
+            p.reset_work_length()
+            self.sum_latency += p.calculate_latency(time)
             self.next_processor.serve_next(p)
             self.processed_count += 1
+        if p_list:
+            self.processed_count += len(p_list)
+            for p in p_list:
+                self.sum_latency += p.calculate_latency(time)
 
 
 class Process:
-    def __init__(self, work_length):
+    def __init__(self, work_length, creation_time):
+        self.orig_work_length = work_length
         self.work_length = work_length
+        self.creation_time = creation_time
+
+    def reset_work_length(self):
+        self.work_length = self.orig_work_length
+
+    def calculate_latency(self, time):
+        return time - self.creation_time
 
 
 class ProcessGenerator:
     def __init__(self, lambd):
         self.lambd = lambd
 
-    def generate_next(self):
-        return Process(random.expovariate(self.lambd))
+    def generate_next(self, time):
+        return Process(random.expovariate(self.lambd), time)
 
 
 def srjf_resource_allocating(processes_list, working_speed):
@@ -84,25 +101,21 @@ def ps_resource_allocating(processes_list, working_speed):
     if len(processes_list) == 0:
         return 0
     shared_working_speed = working_speed / len(processes_list)
-    count = 0
+    out_list = []
     for i in range(len(processes_list) - 1, -1, -1):
         processes_list[i].work_length -= shared_working_speed
         if processes_list[i].work_length <= 0:
+            out_list.append(processes_list[i])
             processes_list.remove(processes_list[i])
-            count += 1
-    return count
+    return out_list
 
 
 def fcfs_resource_allocating(processes_list, working_speed):
     if len(processes_list) == 0:
-        return 0
+        return
     p = processes_list[0]
     p.work_length -= working_speed
     if p.work_length <= 0:
         processes_list.remove(p)
-        return 1
-    return 0
-
-
-def precise_calculation():
-    pass
+        return p
+    return
