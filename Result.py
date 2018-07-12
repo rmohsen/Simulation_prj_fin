@@ -11,7 +11,7 @@ def simulate(k3):
     global output
 
     mu3 = 1
-    # for optional part of project run with this line
+    # for optional part of project run with this line (timing_type=4)
     # core_pros = sim.Processor(name=3, queue_capacity=k3 + 8, timing_type=4, mu=mu3, next_processor=None)
     core_pros = sim.Processor(name=3, queue_capacity=k3 + 8, timing_type=3, mu=mu3, next_processor=None)
 
