@@ -35,7 +35,7 @@ def simulate(k3):
     t = 0
     warm_up = True
     while core_pros.processed_count < processed_count_to_end:
-        if core_pros.processed_count >= 50000 and warm_up:
+        if core_pros.processed_count >= 5000 and warm_up:
             pre_pros_1.reset_data()
             pre_pros_2.reset_data()
             core_pros.reset_data()
@@ -121,7 +121,10 @@ for i in range(4, 7):
             sum_values += output[k][j][i]
         s = math.sqrt(st.variance(o_list))
         y = st.mean(o_list)
-        precision = (1.96 * s) / (math.sqrt(r) * y)
+        if -0.0000001 < y < 0.0000001:
+            precision = 0
+        else:
+            precision = (1.96 * s) / (math.sqrt(r) * y)
         outputs.append(sum_values / r)
         print("2." + str(i - 3) + "(k3=" + str(k + 8) + "): " + str(y) + "\t\tprecision: " + str(precision))
     show_plot(outputs, '2.' + str(i - 3))
